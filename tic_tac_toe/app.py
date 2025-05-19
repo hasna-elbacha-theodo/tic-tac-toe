@@ -11,57 +11,77 @@ class Game:
         [' ', ' ', ' '],
         [' ', ' ', ' ']
     ]
-    #Rules
-#there are two players in the game (X and O)
-# a game has nine fields in a 3x3 grid
-#players take turns taking fields until the game is over
-#a player can take a field if not already taken
-#a game is over when all fields in a row are taken by a player
-#a game is over when all fields in a column are taken by a player
-#a game is over when all fields in a diagonal are taken by a player
-#a game is over when all fields are taken
-    def check_winner(self):
-        self.winner = None
-        win_lines = [
-            [(0, 0), (0, 1), (0, 2)],
-            [(1, 0), (1, 1), (1, 2)],
-            [(2, 0), (2, 1), (2, 2)],
+    def check_column_win(self) -> bool:
+        for col in range(3):
+            if (self.grid[0][col] ==
+                self.grid[1][col] ==
+                self.grid[2][col] != ' '):
+                self.winner = self.grid[0][col]
+                return True
+        return False
 
-            [(0, 0), (1, 0), (2, 0)],
-            [(0, 1), (1, 1), (2, 1)],
-            [(0, 2), (1, 2), (2, 2)],
+    def check_row_win(self) -> bool:
+        for row in range(3):
+            if (self.grid[row][0] ==
+                self.grid[row][1] ==
+                self.grid[row][2] != ' '):
+                self.winner = self.grid[row][0]
+                return True
+        return False
 
-            [(0, 0), (1, 1), (2, 2)],
-            [(0, 2), (1, 1), (2, 0)],
-        ]
-        for line in win_lines:
-            values = [self.grid[r][c] for r, c in line]
+    def check_diagonal_win(self) -> bool:
+        if (self.grid[0][0] ==
+            self.grid[1][1] ==
+            self.grid[2][2] != ' '):
+            self.winner = self.grid[0][0]
+            return True
 
-            if values == ["X", "X", "X"]:
-                self.winner = "X"
-                self.is_over = True
-                return
-            if values == ["O", "O", "O"]:
-                self.winner = "O"
-                self.is_over = True
-                return
-            full = all(cell != " " for row in self.grid for cell in row)
-            if full and self.winner is None:
-                print("No winner!")
-                self.is_over = True
-                return
+        if (self.grid[0][2] ==
+            self.grid[1][1] ==
+            self.grid[2][0] != ' '):
+            self.winner = self.grid[0][2]
+            return True
+        return False
+
+    # Evaluate game state after a move (win or draw)
+    def evaluate_game_state(self):
+        if (self.check_row_win() or
+                self.check_column_win() or
+                self.check_diagonal_win()):
+            self.is_over = True
+            return
+        is_grid_full = all(cell != " " for row in self.grid for cell in row)
+        if is_grid_full and self.winner is None:
+            print("No winner!")
+            self.is_over = True
+            return
 
     def play(self, move: str):
-       col_move = move[0]
-       row_index= int(move[1])
-       col_object = {"A": 0, "B": 1, "C": 2}
-       col_index = col_object[col_move]
-       if self.grid[row_index][col_index]== " ":
-                      self.grid[row_index][col_index] = self.current_player
-                      if self.current_player == 'X':
-                          self.current_player = 'O'
-                      else:
-                          self.current_player = 'X'
-       self.check_winner()
+        # Validate input format
+        if len(move) != 2:
+            raise ValueError("Invalid move format. Use format 'A1', 'B2', etc.")
+        col_move = move[0]
+
+        # Validate row
+        if int(move[1]) not in (1, 2, 3):
+            raise ValueError(f"Invalid row '{move[1]}'. Choose 1, 2, or 3.")
+        row_index = int(move[1]) - 1
+        col_object = {"A": 0, "B": 1, "C": 2}
+
+        # Validate column
+        if col_move not in col_object.keys():
+            raise ValueError(f"Invalid column '{col_move}'. Choose from A, B, or C.")
+        col_index = col_object[col_move]
+
+        # Check if cell is free
+        if self.grid[row_index][col_index] != ' ':
+            raise ValueError(f"Cell {move} is already taken.")
+        else:
+            self.grid[row_index][col_index] = self.current_player
+            if self.current_player == 'X':
+                self.current_player = 'O'
+            else:
+                self.current_player = 'X'
+        self.evaluate_game_state()
 
 

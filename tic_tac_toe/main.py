@@ -6,7 +6,10 @@ def run():
     while not game.is_over:
         print_grid(game.grid)
         move = input(f"\nEnter player {game.current_player} move (A1, A2, A3, B1, B2, ...):")
-        game.play(move)
+        try:
+            game.play(move)
+        except ValueError as e:
+            print(f"Erreur : {e}")
     print('Game over!')
     print(f'Winner is {game.winner}')
 
