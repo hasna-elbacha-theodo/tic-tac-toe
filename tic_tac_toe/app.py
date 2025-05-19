@@ -3,14 +3,15 @@ from typing import Optional
 
 
 class Game:
-    winner: Optional[str]
-    current_player = 'X'
-    is_over = False
-    grid: list[list[str]] = [
-        [' ', ' ', ' '],
-        [' ', ' ', ' '],
-        [' ', ' ', ' ']
-    ]
+    def __init__(self):
+        self.current_player = 'X'
+        self.is_over = False
+        self.winner = Optional[str]
+        self.grid = [
+            [' ', ' ', ' '],
+            [' ', ' ', ' '],
+            [' ', ' ', ' ']
+        ]
     def check_column_win(self) -> bool:
         for col in range(3):
             if (self.grid[0][col] ==
@@ -43,6 +44,12 @@ class Game:
             return True
         return False
 
+    def match_null_state(self) -> bool:
+        return all(
+            cell != ' '
+            for row in self.grid
+            for cell in row
+        )
     # Evaluate game state after a move (win or draw)
     def evaluate_game_state(self):
         if (self.check_row_win() or
@@ -50,7 +57,7 @@ class Game:
                 self.check_diagonal_win()):
             self.is_over = True
             return
-        is_grid_full = all(cell != " " for row in self.grid for cell in row)
+        is_grid_full = self.match_null_state()
         if is_grid_full and self.winner is None:
             print("No winner!")
             self.is_over = True
